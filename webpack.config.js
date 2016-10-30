@@ -1,6 +1,5 @@
 module.exports = {
     entry: {
-        demo: "./src/xor-demo.js",
         browser: "./src/browser.js"
     },
     output: {

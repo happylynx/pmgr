@@ -1,6 +1,9 @@
 // @flow
 
-// const a = await Promise.resolve(2);
-async function q() {
-    return await Promise.resolve(2)
+// const a = {foo:8, bar: 9}
+declare interface A {
+    foo: number
 }
+declare var a: A
+
+console.log(a.foo)

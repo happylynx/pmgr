@@ -1,6 +1,6 @@
 module.exports = {
     entry: {
-        browser: "./src/browser.js"
+        pmgr: "./src/binding.js"
     },
     output: {
         path: './dist',
@@ -14,5 +14,7 @@ module.exports = {
                 loader: 'babel-loader'
             }
         ]
-    }
+    },
+    externals : '$',
+    devtool: 'source-map'
 };

@@ -1,3 +1,5 @@
+const CopyWebpackPlugin = require('copy-webpack-plugin')
+
 module.exports = {
     entry: {
         pmgr: "./src/binding.js"
@@ -13,8 +15,13 @@ module.exports = {
                 exclude: /node_modules/,
                 loader: 'babel-loader'
             }
-        ]
+        ],
     },
+    plugins: [
+        new CopyWebpackPlugin([{
+            from: 'page.html'
+        }])
+    ],
     externals : '$',
     devtool: 'source-map'
 };

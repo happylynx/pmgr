@@ -6,7 +6,8 @@ module.exports = {
     },
     output: {
         path: './dist',
-        filename: "[name].bundle.js"
+        filename: "[name].bundle.js",
+        publicPath: '/'
     },
     module: {
         loaders: [
@@ -19,9 +20,15 @@ module.exports = {
     },
     plugins: [
         new CopyWebpackPlugin([{
-            from: 'page.html'
+            from: 'page.html',
+            force: true
         }])
     ],
     externals : '$',
-    devtool: 'source-map'
+    devtool: 'source-map',
+    devServer: {
+        inline: true,
+        hot: true,
+        contentBase: 'dist'
+    }
 };

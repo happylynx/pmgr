@@ -24,7 +24,7 @@ module.exports = {
             force: true
         }])
     ],
-    externals : '$',
+    externals : ['$', 'window', 'gapi'],
     devtool: 'source-map',
     devServer: {
         inline: true,

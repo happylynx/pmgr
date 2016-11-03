@@ -6,14 +6,19 @@ declare interface JquerySelection {
 }
 
 declare var $: (selection: Function|string) => JquerySelection
+declare var gapi: Object
+declare var window
 
 import * as cryptolib from './browser'
 
-console.log($)
+const CLIENT_ID = '58468353349-3kmjikbb3p50dcq0uondosut4aau97sj.apps.googleusercontent.com'
+const SCOPES = 'https://www.googleapis.com/auth/drive.metadata.readonly'
+
 $(init)
 
 function init() {
     $('#encrypt').click(encrypt)
+    $('#signin').click(signin)
 }
 
 function encrypt() {
@@ -27,3 +32,26 @@ function encrypt() {
         .then(cryptoText => console.log(cryptoText))
         .catch(console.log.bind(console))
 }
+
+function signin() {
+    console.log('signin button')
+    gapi.auth.authorize(
+        {client_id: CLIENT_ID, scope: SCOPES, immediate: false},
+        handleAuthResult);
+}
+
+function handleAuthResult(authResult) {
+    if (authResult && !authResult.error) {
+        console.log('logged in')
+    } else {
+        console.log('not logged in')
+    }
+}
+
+function checkAuth() {
+    console.log('gapi', gapi)
+    gapi.auth.authorize(
+        {client_id: CLIENT_ID, scope: SCOPES, immediate: true},
+        handleAuthResult);
+}
+window.checkAuth = checkAuth

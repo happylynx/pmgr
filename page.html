@@ -7,8 +7,9 @@
             src="https://code.jquery.com/jquery-3.1.1.min.js"
             integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
             crossorigin="anonymous"></script>
-        <script src="https://apis.google.com/js/client.js?onload=checkAuth"></script>
+        <!--<script>checkAuth = () => console.log('checkAuth lambda')</script>-->
         <script src="pmgr.bundle.js"></script>
+        <script src="https://apis.google.com/js/client.js?onload=checkAuth"></script>
     </head>
     <body>
         <h1>pmgr</h1>
@@ -17,5 +18,7 @@
         <label for="password">password</label>
         <input type="text" id="password" />
         <button id="encrypt">encrypt</button>
+        <br>
+        <button id="signin">sign in</button>
     </body>
 </html>

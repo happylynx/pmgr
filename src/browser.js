@@ -45,6 +45,7 @@ async function deriveKey(binaryPasswordKey) {
 }
 export async function encrypt(password:string, cleartext:Uint8Array, nonce: Uint8Array): Promise<Uint8Array> {
     // TODO add hash verification
+    // TODO add randomization
     const binaryPasswordKey = await toCryptoKey(password)
     const key = await deriveKey(binaryPasswordKey);
     const counter = new Uint8Array(16); // AES-CTR requires 16B

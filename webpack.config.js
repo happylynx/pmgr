@@ -13,7 +13,7 @@ module.exports = {
         libraryTarget: 'umd'
     },
     module: {
-        loaders: [
+        loaders: [ // TODO add flow-bin-loader
             {
                 test: /\.js$/,
                 exclude: /node_modules/,

@@ -4,7 +4,7 @@ module.exports = {
     entry: {
         pmgr: ['babel-polyfill','./src/binding.js'],
         // the array parenthesis is a workaround - an entry point can't be a dependency of another endpoint
-        crypto: ['babel-polyfill', './src/browser.js']
+        core: ['babel-polyfill', './src/core.js']
     },
     output: {
         path: './dist',

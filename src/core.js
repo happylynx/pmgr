@@ -120,25 +120,6 @@ export function concat(...typedArrays: Array<Uint8Array|Uint32Array|ArrayBuffer>
 
 declare interface CryptoKey {}
 
-function main() {
-    const nonce = new Uint8Array(16);
-    crypto.getRandomValues(nonce)
-    for (let i = 0; i < nonce.length; i++) {
-        //e(i.toString(), nonce.subarray(0, i+1))
-    }
-    function e(label, nonce) {
-        encrypt('ahoj', toBinary('svete'), nonce)
-            .then(cryptotext =>console.log(new Uint8Array(cryptotext)))
-    }
-
-    completeEncrypt('pass', 'hello world').then( cryptotext => {
-        console.log(cryptotext)
-        completeDecrypt('pass', cryptotext).then( cleartext => {
-            console.log(cleartext)
-        })
-    })
-}
-
 function prependHash(input: string): string {
     const hash = sha3_512(input)
     return hash + input
@@ -158,8 +139,9 @@ function* createRandomIterator(nonce: Uint8Array) {
         throw new Error()
     }
     const numberWidth = 4
+    /** structure |block index (numberWidth B)||(nonce HASH_LENGTH_BYTES B)| */
     const blockToHash = new ArrayBuffer(HASH_LENGTH_BYTES + numberWidth);
-    new Uint8Array(blockToHash, 4).set(nonce)
+    new Uint8Array(blockToHash, numberWidth).set(nonce)
     const blockToHashView = new DataView(blockToHash)
     let blockIndex = 0
     while (true) {
@@ -169,11 +151,6 @@ function* createRandomIterator(nonce: Uint8Array) {
         yield* hashArray
     }
 }
-
-// declare interface IteratorResult<T> {
-//     value: T|undefined,
-//     done: boolean
-// }
 
 declare interface Iterator<T> {
     next(): IteratorResult<T>

@@ -4,15 +4,13 @@
   "description": "Password Manager",
   "main": "main.js",
   "scripts": {
-    "test": "jest",
     "start": "webpack-dev-server --hot",
-    "build": "webpack"
+    "build": "webpack",
+    "test": "rm -rf dist && npm run build && node -p \"console.log(require('./dist/crypto.bundle.js'))\""
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "js-sha3": "^0.5.5",
-    "utf8-encoder": "^1.0.0"
   },
   "devDependencies": {
     "babel-cli": "^6.18.0",
@@ -20,19 +18,12 @@
     "babel-loader": "^6.2.5",
     "babel-plugin-transform-async-to-generator": "^6.16.0",
     "babel-plugin-transform-flow-strip-types": "^6.18.0",
-    "babel-plugin-transform-regenerator": "^6.16.1",
     "babel-plugin-transform-runtime": "^6.15.0",
-    "babel-polyfill": "^6.16.0",
     "babel-preset-es2015": "^6.18.0",
     "copy-webpack-plugin": "^4.0.0",
     "flow-bin": "^0.36.0",
-    "jest-cli": "^16.0.2",
+    "flow-bin-loader": "^1.0.2",
     "js-sha3": "^0.5.5",
-    "regenerator-runtime": "^0.9.5",
-    "utf8-encoder": "^1.0.0",
-    "wdio-firefox-profile-service": "0.0.1",
-    "wdio-mocha-framework": "^0.4.6",
-    "webdriverio": "^4.2.16",
     "webpack": "^1.13.2"
   }
 }

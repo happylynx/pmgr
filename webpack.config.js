@@ -2,9 +2,9 @@ const CopyWebpackPlugin = require('copy-webpack-plugin')
 
 module.exports = {
     entry: {
-        pmgr: './src/binding.js',
+        pmgr: ['babel-polyfill','./src/binding.js'],
         // the array parenthesis is a workaround - an entry point can't be a dependency of another endpoint
-        crypto: ['./src/browser.js']
+        crypto: ['babel-polyfill', './src/browser.js']
     },
     output: {
         path: './dist',

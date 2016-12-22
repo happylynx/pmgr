@@ -1,4 +1,11 @@
 // @flow
+
+declare module 'js-sha3' {
+    declare function sha3_512(input: string): string
+}
+
+import {sha3_512} from 'js-sha3'
+
 declare var crypto: {
     subtle:any,
     getRandomValues:(intArray: Uint8Array) => void
@@ -12,6 +19,12 @@ const KEY_DERIVATION_SALT = 'key derivation salt'
 const FORMAT_VERSION = 1
 
 const UNSUPPORTED_FORMAT_VERSION = 'unsupported format version'
+
+const HASH_LENGTH_CHARS = 128
+const HASH_LENGTH_BYTES = 64
+
+// workaround https://github.com/babel/babel/issues/5032
+function* _dummy() {}
 
 // file format version(4B),encrypted blob
 
@@ -107,12 +120,118 @@ function main() {
             .then(cryptotext =>console.log(new Uint8Array(cryptotext)))
     }
 
-    completeEncrypt('passs', 'hello world').then( cryptotext => {
+    completeEncrypt('pass', 'hello world').then( cryptotext => {
         console.log(cryptotext)
-        completeDecrypt('passs', cryptotext).then( cleartext => {
+        completeDecrypt('pass', cryptotext).then( cleartext => {
             console.log(cleartext)
         })
     })
 }
+
+function prependHash(input: string): string {
+    const hash = sha3_512(input)
+    return hash + input
+}
+
+function verifyHash(hashedMessage: string): ?string {
+    const originalHash = hashedMessage.substr(0, HASH_LENGTH_CHARS)
+    const message = hashedMessage.substr(HASH_LENGTH_CHARS)
+    const newHash = sha3_512(message)
+    return originalHash === newHash
+        ? message
+        : null
+}
+
+function* createRandomIterator(nonce: Uint8Array) {
+    if (nonce.length != HASH_LENGTH_BYTES) {
+        throw new Error()
+    }
+    const numberWidth = 4
+    const blockToHash = new ArrayBuffer(HASH_LENGTH_BYTES + numberWidth);
+    new Uint8Array(blockToHash, 4).set(nonce)
+    const blockToHashView = new DataView(blockToHash)
+    let blockIndex = 0
+    while (true) {
+        blockToHashView.setInt32(blockIndex)
+        const hashArrayBuffer = sha3_512.arrayBuffer(blockToHash)
+        const hashArray = new Uint8Array(hashArrayBuffer)
+        yield* hashArray
+    }
+}
+
+// declare interface IteratorResult<T> {
+//     value: T|undefined,
+//     done: boolean
+// }
+
+declare interface Iterator<T> {
+    next(): IteratorResult<T>
+}
+
+function takeUint8(iterator: Iterator<number>, count: number): Uint8Array {
+    const result = new Uint8Array(count)
+    result.map((_, index) => iterator.next().value)
+    return result
+}
+
+function randomUint8Array(seed: Uint8Array, count: length): Uint8Array {
+    const iterator = createRandomIterator(seed)
+    const result = takeUint8(iterator, length)
+    return result
+}
+
+function randomize(input: Uint8Array): Uint8Array {
+    const nonce = new Uint8Array(HASH_LENGTH_BYTES);
+    crypto.getRandomValues(nonce)
+    const result = parametrizedRandomize(input, nonce)
+    return result
+}
+
+function parametrizedRandomize(input: Uint8Array, nonce: Uint8Array): Uint8Array {
+    if (nonce.length != HASH_LENGTH_BYTES) {
+        throw new Error()
+    }
+    const result = new Uint8Array(input.length + HASH_LENGTH_BYTES)
+    const resultData = result.subarray(HASH_LENGTH_BYTES)
+    result.set(nonce)
+    const randomArray = randomUint8Array(nonce, input.length)
+    xorToFirstParam(resultData, randomArray)
+    return result
+}
+
+function deRandomize(input: Uint8Array): Uint8Array {
+    if (input.length < HASH_LENGTH_BYTES) {
+        throw new Error()
+    }
+    const nonce = input.subarray(0, HASH_LENGTH_BYTES)
+    const result = new Uint8Array(input, HASH_LENGTH_BYTES)
+    const randomArray = randomUint8Array(nonce, result.length)
+    xorToFirstParam(result, randomArray)
+    return result
+}
+
+function xor(a: Uint8Array, b: Uint8Array): Uint8Array {
+    const result = new Uint8Array(a.length);
+    result.set(a)
+    xorToFirstParam(result, b)
+    return result
+}
+
+function xorToFirstParam(a: Uint8Array, b: Uint8Array): void {
+    if (a.length !== b.length) {
+        throw new Error(`Different length ${a.length}, ${b.length}.`)
+    }
+    a.map((element, index) => element ^ b[index])
+}
+
+export const forTesting = {
+    prependHash,
+    verifyHash,
+    toBinary,
+    toString,
+    randomize,
+    deRandomize
+}
+
 
 main()

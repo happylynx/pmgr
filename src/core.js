@@ -170,11 +170,10 @@ declare interface Iterator<T> {
 
 function takeUint8(iterator: Iterator<number>, count: number): Uint8Array {
     const result = new Uint8Array(count)
-    result.map((_, index) => iterator.next().value)
-    return result
+    return result.map((_, index) => iterator.next().value)
 }
 
-function randomUint8Array(seed: Uint8Array, count: length): Uint8Array {
+function randomUint8Array(seed: Uint8Array, length: number): Uint8Array {
     const iterator = createRandomIterator(seed)
     const result = takeUint8(iterator, length)
     return result
@@ -193,6 +192,7 @@ function parametrizedRandomize(input: Uint8Array, nonce: Uint8Array): Uint8Array
     }
     const result = new Uint8Array(input.length + HASH_LENGTH_BYTES)
     const resultData = result.subarray(HASH_LENGTH_BYTES)
+    resultData.set(input)
     result.set(nonce)
     const randomArray = randomUint8Array(nonce, input.length)
     xorToFirstParam(resultData, randomArray)
@@ -204,8 +204,9 @@ function deRandomize(input: Uint8Array): Uint8Array {
         throw new Error()
     }
     const nonce = input.subarray(0, HASH_LENGTH_BYTES)
-    const result = new Uint8Array(input, HASH_LENGTH_BYTES)
-    const randomArray = randomUint8Array(nonce, result.length)
+    const randomizedBytes = input.subarray(HASH_LENGTH_BYTES)
+    const result = new Uint8Array(randomizedBytes)
+    const randomArray = randomUint8Array(nonce, randomizedBytes.length)
     xorToFirstParam(result, randomArray)
     return result
 }
@@ -221,7 +222,9 @@ function xorToFirstParam(a: Uint8Array, b: Uint8Array): void {
     if (a.length !== b.length) {
         throw new Error(`Different length ${a.length}, ${b.length}.`)
     }
-    a.map((element, index) => element ^ b[index])
+    a.forEach((element, index) => {
+        a[index] = element ^ b[index]
+    })
 }
 
 export const forTesting = {

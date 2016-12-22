@@ -105,13 +105,14 @@ describe('hashing', () => {
 describe('randomize', () => {
     it('matches', () => {
         const content = new Uint8Array([0, 1, 2, 3, 4])
-        const deRandomizeContent = forTesting.deRandomize(randomize(content))
-        expect(deRandomizeContent).to.eqaul(content)
+        const deRandomizeContent = forTesting.deRandomize(forTesting.randomize(content))
+        expect(deRandomizeContent).to.eql(content)
     })
 
     it('does something', () => {
         const content = new Uint8Array([0, 1, 2, 3, 4])
         const randomized = forTesting.randomize(content)
         expect(randomized).not.to.eql(content)
+        expect(randomized.length).to.be.greaterThan(content.length)
     })
 })

@@ -28,6 +28,12 @@ const INIT_VECTOR_LENGTH = 256 / 8
 const KEY_DERIVATION_SALT = 'key derivation salt'
 
 const FORMAT_VERSION = 1
+const BINARY_FORMAT_VERSION = (() => {
+    const result = new Uint8Array(4)
+    new DataView(result.buffer).setUint32(0, FORMAT_VERSION)
+    return result
+})()
+const FILE_MAGIC_NUMBER = toBinary('pmgr')
 
 const UNSUPPORTED_FORMAT_VERSION = 'unsupported format version'
 
@@ -106,6 +112,7 @@ export async function completeEncrypt(password: string, clearText: string): Prom
     return concat(version, nonce, cryptText)
 }
 
+// TODO to Uint8Array only
 export function concat(...typedArrays: Array<Uint8Array|Uint32Array|ArrayBuffer>): Uint8Array {
     const resultLength = typedArrays.reduce((sum, current) => sum + current.byteLength, 0)
     const result = new Uint8Array(resultLength)
@@ -132,6 +139,38 @@ function verifyHash(hashedMessage: string): ?string {
     return originalHash === newHash
         ? message
         : null
+}
+
+function prependHashBinary(input: Uint8Array): Uint8Array {
+    const hash = new Uint8Array(sha3_512.arrayBuffer(input))
+    const result = new Uint8Array(hash.length + input.length)
+    result.set(hash)
+    result.set(input, hash.length)
+    return result
+}
+
+function verifyHashBinary(hashAndData: Uint8Array): ?Uint8Array {
+    const originalHash = hashAndData.subarray(0, HASH_LENGTH_BYTES)
+    const data = hashAndData.subarray(HASH_LENGTH_BYTES)
+    const newHash = sha3_512.arrayBuffer(data)
+    const isHashValid = equalUint8Array(originalHash, newHash)
+    return isHashValid ? new Uint8Array(data) : null;
+}
+
+function equalUint8Array(a: Uint8Array, b: Uint8Array): boolean {
+    if (!(a instanceof Uint8Array)) {
+        return false
+    }
+    if (!(b instanceof Uint8Array)) {
+        return false
+    }
+    if (a === b) {
+        return true
+    }
+    if (a.length != b.length) {
+        return false
+    }
+    return a.every((element, index) => element === b[index])
 }
 
 function* createRandomIterator(nonce: Uint8Array) {
@@ -213,6 +252,51 @@ function xorToFirstParam(a: Uint8Array, b: Uint8Array): void {
     a.forEach((element, index) => {
         a[index] = element ^ b[index]
     })
+}
+
+function simpleBinaryEncrypt(password: string, plaintext: Uint8Array): Uint8Array {
+    encrypt()
+}
+
+/**
+ * The function to use
+ * @param password
+ * @param plaintext
+ */
+export async function encrypt2(password: string, plaintext: string): Promise<Uint8Array> {
+    const binaryPlaintext = toBinary(plaintext)
+    const hashAndPlaintext = prependHashBinary(binaryPlaintext)
+    const randomizedPlaintext = randomize(hashAndPlaintext)
+    const encryptionNonce = new Uint8Array(16)
+    window.crypto.getRandomValues(encryptionNonce)
+    const encrypted = await encrypt(password, randomizedPlaintext, encryptionNonce)
+    const result = concat(FILE_MAGIC_NUMBER, BINARY_FORMAT_VERSION, encryptionNonce, encrypted)
+    return result
+}
+
+export async function decrypt2(password: string, encryptedContainer: Uint8Array): Promise<string> {
+    const magicNumber = encryptedContainer.subarray(0, 4)
+    const formatVersion = encryptedContainer.subarray(4, 4 + 4)
+    const encryptionNonce = encryptedContainer.subarray(4 + 4, 4 + 4 + 16)
+    const encryptedData = encryptedContainer.subarray(4 + 4 + 16)
+    if (!equalUint8Array(magicNumber, FILE_MAGIC_NUMBER)) {
+        throw 'MAGIC_NUMBER_MISMATCH' // TODO to constant
+    }
+    if (!equalUint8Array(formatVersion, BINARY_FORMAT_VERSION)) {
+        throw 'FORMAT_NUMBER_MISMATCH'
+    }
+    const plaintext = await decrypt(password, encryptedData, encryptionNonce)
+    const derandomized = deRandomize(plaintext)
+    try {
+        const binaryData = verifyHashBinary(derandomized)
+        const textData = toString(binaryData)
+        return textData
+    } catch (error) {
+        if (error instanceof Error) {
+            throw 'HASH_VERIFICATION_FAILED'
+        }
+        throw error
+    }
 }
 
 export const forTesting = {

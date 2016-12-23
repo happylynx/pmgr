@@ -68,12 +68,12 @@ async function deriveKey(binaryPasswordKey) {
         ["encrypt", "decrypt"]);
 }
 export async function encrypt(password:string, cleartext:Uint8Array, nonce: Uint8Array): Promise<Uint8Array> {
-    // TODO add hash verification
-    // TODO add randomization
+    if (nonce.length != 16) {
+        throw new Error()
+    }
     const binaryPasswordKey = await toCryptoKey(password)
     const key = await deriveKey(binaryPasswordKey);
-    const counter = new Uint8Array(16); // AES-CTR requires 16B
-    counter.set(nonce);
+    const counter = new Uint8Array(nonce); // AES-CTR requires 16B
     const cryptotext = await crypto.subtle.encrypt({"name": "AES-CTR", counter, length: 24}, key, cleartext)
     return new Uint8Array(cryptotext)
 }

@@ -8,7 +8,7 @@
  * |hash||binary content|
  * |randomization nonce||bytes from above|
  * |encrypted bytes from above|
- * |file format identifier (4B)||container format identifier (4B)||bytes from above|
+ * |file format identifier (4B)||container format identifier (4B)||encryption nonce(16 B)||bytes from above|
  */
 
 declare module 'js-sha3' {

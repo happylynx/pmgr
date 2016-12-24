@@ -89,7 +89,11 @@ export async function decrypt(password: string, cryptoText: Uint8Array, nonce: U
     const key = await deriveKey(binaryPasswordKey);
     const counter = new Uint8Array(16); // AES-CTR requires 16B
     counter.set(nonce);
-    return crypto.subtle.decrypt({"name": "AES-CTR", counter, length: 24}, key, cryptoText)
+    const decryptedBuffer:ArrayBuffer = await crypto.subtle.decrypt(
+        {"name": "AES-CTR", counter, length: 24},
+        key,
+        cryptoText)
+    return new Uint8Array(decryptedBuffer)
 }
 
 export async function completeDecrypt(password: string, blob: Uint8Array): Promise<string> {
@@ -149,10 +153,11 @@ function prependHashBinary(input: Uint8Array): Uint8Array {
     return result
 }
 
+// TODO add test
 function verifyHashBinary(hashAndData: Uint8Array): ?Uint8Array {
     const originalHash = hashAndData.subarray(0, HASH_LENGTH_BYTES)
     const data = hashAndData.subarray(HASH_LENGTH_BYTES)
-    const newHash = sha3_512.arrayBuffer(data)
+    const newHash = new Uint8Array(sha3_512.arrayBuffer(data))
     const isHashValid = equalUint8Array(originalHash, newHash)
     return isHashValid ? new Uint8Array(data) : null;
 }
@@ -280,23 +285,19 @@ export async function decrypt2(password: string, encryptedContainer: Uint8Array)
     const encryptionNonce = encryptedContainer.subarray(4 + 4, 4 + 4 + 16)
     const encryptedData = encryptedContainer.subarray(4 + 4 + 16)
     if (!equalUint8Array(magicNumber, FILE_MAGIC_NUMBER)) {
-        throw 'MAGIC_NUMBER_MISMATCH' // TODO to constant
+        throw new AppError('MAGIC_NUMBER_MISMATCH')
     }
     if (!equalUint8Array(formatVersion, BINARY_FORMAT_VERSION)) {
-        throw 'FORMAT_NUMBER_MISMATCH'
+        throw new AppError('CONTAINER_FORMAT_NUMBER_MISMATCH')
     }
     const plaintext = await decrypt(password, encryptedData, encryptionNonce)
-    const derandomized = deRandomize(plaintext)
-    try {
-        const binaryData = verifyHashBinary(derandomized)
-        const textData = toString(binaryData)
-        return textData
-    } catch (error) {
-        if (error instanceof Error) {
-            throw 'HASH_VERIFICATION_FAILED'
-        }
-        throw error
+    const deRandomized = deRandomize(plaintext)
+    const binaryData = verifyHashBinary(deRandomized)
+    if (binaryData == null) {
+        throw new AppError('HASH_VERIFICATION_FAILED')
     }
+    const textData = toString(binaryData)
+    return textData
 }
 
 type ErrorKey = 'HASH_VERIFICATION_FAILED'

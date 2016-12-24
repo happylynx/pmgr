@@ -116,3 +116,17 @@ describe('randomize', () => {
         expect(randomized.length).to.be.greaterThan(content.length)
     })
 })
+
+describe('en/de crypt2', () => {
+    it('matches', (done) => {
+        const plaintext = "hello world"
+        const password = "foo bar"
+        encrypt2(password, plaintext)
+            .then(cryptotext => decrypt2(password, cryptotext))
+            .then(decrypted => {
+                expect(decrypted).to.eql(plaintext)
+                done()
+            })
+            .catch(done)
+    })
+})

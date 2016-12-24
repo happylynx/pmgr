@@ -299,6 +299,23 @@ export async function decrypt2(password: string, encryptedContainer: Uint8Array)
     }
 }
 
+type ErrorKey = 'HASH_VERIFICATION_FAILED'
+    | 'CONTAINER_FORMAT_NUMBER_MISMATCH'
+    | 'MAGIC_NUMBER_MISMATCH'
+
+class AppError {
+
+    key: ErrorKey
+    details: Object
+    error: Error
+
+    constructor(key: ErrorKey, details: ?Object) {
+        this.key = key
+        this.details = details || {}
+        this.error = new Error()
+    }
+}
+
 export const forTesting = {
     prependHash,
     verifyHash,

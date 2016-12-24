@@ -345,6 +345,3 @@ export const forTesting = {
     randomize,
     deRandomize
 }
-
-
-main()

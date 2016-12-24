@@ -314,6 +314,27 @@ class AppError {
         this.details = details || {}
         this.error = new Error()
     }
+
+    toString() {
+        return `${this.key} details=${JSON.stringify(this.details)} error=${errorToString(this.error)}`
+    }
+
+    toJSON() {
+        return this.toString()
+    }
+}
+
+function errorToString(error: Error): string {
+    const propertiesToPrint = ['fileName', 'lineNumber', 'columnNumber', 'message', 'stack']
+    const description = propertiesToPrint.map(property => getPropertyIfExists(property, error))
+        .join(', ')
+    return `{Error ${description}}`
+}
+
+function getPropertyIfExists(propertyName: string, object: Object): string {
+    return (propertyName in object)
+        ? `${propertyName}=${object[propertyName]}`
+        : ''
 }
 
 export const forTesting = {

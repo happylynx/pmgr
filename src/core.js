@@ -73,6 +73,8 @@ async function deriveKey(binaryPasswordKey) {
         // this web crypto object will only be allowed for these functions
         ["encrypt", "decrypt"]);
 }
+
+// TODO rename to encryptParametrized
 export async function encrypt(password:string, cleartext:Uint8Array, nonce: Uint8Array): Promise<Uint8Array> {
     if (nonce.length != 16) {
         throw new Error()
@@ -107,6 +109,7 @@ export async function completeDecrypt(password: string, blob: Uint8Array): Promi
     return toString(plainBytes)
 }
 
+// TODO remove
 export async function completeEncrypt(password: string, clearText: string): Promise<Uint8Array> {
     // TODO add identifying word
     const version = Uint32Array.of(FORMAT_VERSION)
@@ -268,6 +271,7 @@ function simpleBinaryEncrypt(password: string, plaintext: Uint8Array): Uint8Arra
  * @param password
  * @param plaintext
  */
+// rename to just 'encrypt'
 export async function encrypt2(password: string, plaintext: string): Promise<Uint8Array> {
     const binaryPlaintext = toBinary(plaintext)
     const hashAndPlaintext = prependHashBinary(binaryPlaintext)
@@ -279,7 +283,10 @@ export async function encrypt2(password: string, plaintext: string): Promise<Uin
     return result
 }
 
+// TODO add flow plugin to webpack https://www.npmjs.com/package/flow-status-webpack-plugin
+
 export async function decrypt2(password: string, encryptedContainer: Uint8Array): Promise<string> {
+    // TODO move following numbers to constants
     const magicNumber = encryptedContainer.subarray(0, 4)
     const formatVersion = encryptedContainer.subarray(4, 4 + 4)
     const encryptionNonce = encryptedContainer.subarray(4 + 4, 4 + 4 + 16)

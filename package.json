@@ -1,29 +1,29 @@
 {
-  "name": "y",
-  "version": "1.0.0",
-  "description": "Password Manager",
-  "main": "main.js",
-  "scripts": {
-    "start": "webpack-dev-server --hot",
-    "build": "webpack",
-    "watch": "webpack --watch"
-  },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-  },
-  "devDependencies": {
-    "babel-cli": "^6.18.0",
-    "babel-core": "^6.18.0",
-    "babel-loader": "^6.2.5",
-    "babel-plugin-transform-async-to-generator": "^6.16.0",
-    "babel-plugin-transform-flow-strip-types": "^6.18.0",
-    "babel-plugin-transform-runtime": "^6.15.0",
-    "babel-preset-es2015": "^6.18.0",
-    "copy-webpack-plugin": "^4.0.0",
-    "flow-bin": "^0.36.0",
-    "flow-bin-loader": "^1.0.2",
-    "js-sha3": "^0.5.5",
-    "webpack": "^1.13.2"
-  }
+    "name": "y",
+    "version": "1.0.0",
+    "description": "Password Manager",
+    "main": "main.js",
+    "scripts": {
+        "start": "webpack-dev-server --hot",
+        "build": "webpack",
+        "watch": "webpack --watch"
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+    },
+    "devDependencies": {
+        "babel-cli": "^6.18.0",
+        "babel-core": "^6.18.0",
+        "babel-loader": "^6.2.5",
+        "babel-plugin-transform-async-to-generator": "^6.16.0",
+        "babel-plugin-transform-flow-strip-types": "^6.18.0",
+        "babel-plugin-transform-runtime": "^6.15.0",
+        "babel-preset-es2015": "^6.18.0",
+        "copy-webpack-plugin": "^4.0.0",
+        "flow-bin": "^0.36.0",
+        "flow-bin-loader": "^1.0.2",
+        "js-sha3": "^0.5.5",
+        "webpack": "^1.13.2"
+    }
 }

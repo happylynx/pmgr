@@ -156,7 +156,6 @@ function prependHashBinary(input: Uint8Array): Uint8Array {
     return result
 }
 
-// TODO add test
 function verifyHashBinary(hashAndData: Uint8Array): ?Uint8Array {
     const originalHash = hashAndData.subarray(0, HASH_LENGTH_BYTES)
     const data = hashAndData.subarray(HASH_LENGTH_BYTES)
@@ -349,7 +348,9 @@ export const forTesting = {
     prependHash,
     verifyHash,
     toBinary,
-    toString,
     randomize,
-    deRandomize
+    deRandomize,
+    verifyHashBinary,
+    prependHashBinary,
+    verifyHashBinary
 }

@@ -130,3 +130,12 @@ describe('en/de crypt2', () => {
             .catch(done)
     })
 })
+
+describe('hash binary', () => {
+    it('should match', () => {
+        const content = new Uint8Array([1])
+        const hashed = forTesting.prependHashBinary(content)
+        const deHashed = forTesting.verifyHashBinary(hashed)
+        expect(deHashed).to.eql(content)
+    })
+})

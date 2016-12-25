@@ -119,14 +119,12 @@ export async function completeEncrypt(password: string, clearText: string): Prom
     return concat(version, nonce, cryptText)
 }
 
-// TODO to Uint8Array only
-export function concat(...typedArrays: Array<Uint8Array|Uint32Array|ArrayBuffer>): Uint8Array {
+export function concat(...typedArrays: Array<Uint8Array>): Uint8Array {
     const resultLength = typedArrays.reduce((sum, current) => sum + current.byteLength, 0)
     const result = new Uint8Array(resultLength)
     let startingOffset = 0
     typedArrays.forEach(array => {
-        const typeArray = array instanceof ArrayBuffer ? new Uint8Array(array) : array
-        result.set(typeArray, startingOffset)
+        result.set(array, startingOffset)
         startingOffset += array.byteLength
     })
     return result

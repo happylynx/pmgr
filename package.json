@@ -6,7 +6,6 @@
   "scripts": {
     "start": "webpack-dev-server --hot",
     "build": "webpack",
-    "test": "rm -rf dist && npm run build && node -p \"console.log(require('./dist/core.bundle.js'))\"",
     "watch": "webpack --watch"
   },
   "author": "",

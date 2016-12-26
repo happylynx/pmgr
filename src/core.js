@@ -112,7 +112,7 @@ export async function completeDecrypt(password: string, blob: Uint8Array): Promi
 // TODO remove
 export async function completeEncrypt(password: string, clearText: string): Promise<Uint8Array> {
     // TODO add identifying word
-    const version = Uint32Array.of(FORMAT_VERSION)
+    const version = new Uint8Array(Uint32Array.of(FORMAT_VERSION).buffer)
     const nonce = new Uint8Array(16)
     crypto.getRandomValues(nonce)
     const cryptText = await encrypt(password, toBinary(clearText), nonce)

@@ -280,8 +280,6 @@ export async function encrypt2(password: string, plaintext: string): Promise<Uin
     return result
 }
 
-// TODO add flow plugin to webpack https://www.npmjs.com/package/flow-status-webpack-plugin
-
 export async function decrypt2(password: string, encryptedContainer: Uint8Array): Promise<string> {
     // TODO move following numbers to constants
     const magicNumber = encryptedContainer.subarray(0, 4)

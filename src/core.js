@@ -38,8 +38,6 @@ const ENCRYPTION_NONCE_LENGTH_BYTES = 16
 // workaround https://github.com/babel/babel/issues/5032
 function* _dummy() {}
 
-// file format version(4B),encrypted blob
-
 function toBinary(text:string): Uint8Array {
     return new TextEncoder('utf-8') // TODO remove constructor param
         .encode(text)

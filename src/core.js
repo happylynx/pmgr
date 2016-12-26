@@ -32,6 +32,7 @@ const BINARY_FORMAT_VERSION = (() => {
 })()
 const FILE_MAGIC_NUMBER = toBinary('pmgr')
 
+// TODO delete
 const UNSUPPORTED_FORMAT_VERSION = 'unsupported format version'
 
 const HASH_LENGTH_BYTES = 64
@@ -95,6 +96,7 @@ export async function decrypt(password: string, cryptoText: Uint8Array, nonce: U
     return new Uint8Array(decryptedBuffer)
 }
 
+// TODO delete
 export async function completeDecrypt(password: string, blob: Uint8Array): Promise<string> {
     const version = new Uint32Array(blob.buffer.slice(0, 4))
     if (version[0] !== FORMAT_VERSION) {
@@ -127,6 +129,7 @@ export function concat(...typedArrays: Array<Uint8Array>): Uint8Array {
     return result
 }
 
+// TODO externalize type definitions
 declare interface CryptoKey {}
 
 function prependHashBinary(input: Uint8Array): Uint8Array {

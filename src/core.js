@@ -178,7 +178,7 @@ function equalUint8Array(a: Uint8Array, b: Uint8Array): boolean {
     return a.every((element, index) => element === b[index])
 }
 
-function* createRandomIterator(nonce: Uint8Array) {
+function* createRandomIterator(nonce: Uint8Array): Iterator<number> {
     if (nonce.length != HASH_LENGTH_BYTES) {
         throw new Error()
     }
@@ -196,13 +196,16 @@ function* createRandomIterator(nonce: Uint8Array) {
     }
 }
 
-declare interface Iterator<T> {
-    next(): IteratorResult<T>
-}
-
 function takeUint8(iterator: Iterator<number>, count: number): Uint8Array {
     const result = new Uint8Array(count)
-    return result.map((_, index) => iterator.next().value)
+    return result.map((_, index) => {
+        const iteratorResult: IteratorResult<number, void> = iterator.next()
+        // this `if` branch is there just to satisfy flow type checker
+        if (iteratorResult.done) {
+            throw new Error()
+        }
+        return iteratorResult.value
+    })
 }
 
 function randomUint8Array(seed: Uint8Array, length: number): Uint8Array {
@@ -257,10 +260,6 @@ function xorToFirstParam(a: Uint8Array, b: Uint8Array): void {
     a.forEach((element, index) => {
         a[index] = element ^ b[index]
     })
-}
-
-function simpleBinaryEncrypt(password: string, plaintext: Uint8Array): Uint8Array {
-    encrypt()
 }
 
 /**

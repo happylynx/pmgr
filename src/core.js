@@ -35,6 +35,7 @@ const FILE_MAGIC_NUMBER = toBinary('pmgr')
 const UNSUPPORTED_FORMAT_VERSION = 'unsupported format version'
 
 const HASH_LENGTH_BYTES = 64
+const ENCRYPTION_NONCE_LENGTH_BYTES = 16
 
 // workaround https://github.com/babel/babel/issues/5032
 function* _dummy() {}
@@ -72,7 +73,7 @@ async function deriveKey(binaryPasswordKey) {
 
 // TODO rename to encryptParametrized
 export async function encrypt(password:string, cleartext:Uint8Array, nonce: Uint8Array): Promise<Uint8Array> {
-    if (nonce.length != 16) {
+    if (nonce.length != ENCRYPTION_NONCE_LENGTH_BYTES) {
         throw new Error()
     }
     const binaryPasswordKey = await toCryptoKey(password)
@@ -85,7 +86,7 @@ export async function encrypt(password:string, cleartext:Uint8Array, nonce: Uint
 export async function decrypt(password: string, cryptoText: Uint8Array, nonce: Uint8Array): Promise<Uint8Array> {
     const binaryPasswordKey = await toCryptoKey(password)
     const key = await deriveKey(binaryPasswordKey);
-    const counter = new Uint8Array(16); // AES-CTR requires 16B
+    const counter = new Uint8Array(ENCRYPTION_NONCE_LENGTH_BYTES); // AES-CTR requires 16B
     counter.set(nonce);
     const decryptedBuffer:ArrayBuffer = await crypto.subtle.decrypt(
         {"name": "AES-CTR", counter, length: 24},
@@ -254,7 +255,7 @@ export async function encrypt2(password: string, plaintext: string): Promise<Uin
     const binaryPlaintext = toBinary(plaintext)
     const hashAndPlaintext = prependHashBinary(binaryPlaintext)
     const randomizedPlaintext = randomize(hashAndPlaintext)
-    const encryptionNonce = new Uint8Array(16)
+    const encryptionNonce = new Uint8Array(ENCRYPTION_NONCE_LENGTH_BYTES)
     window.crypto.getRandomValues(encryptionNonce)
     const encrypted = await encrypt(password, randomizedPlaintext, encryptionNonce)
     const result = concat(FILE_MAGIC_NUMBER, BINARY_FORMAT_VERSION, encryptionNonce, encrypted)
@@ -262,11 +263,18 @@ export async function encrypt2(password: string, plaintext: string): Promise<Uin
 }
 
 export async function decrypt2(password: string, encryptedContainer: Uint8Array): Promise<string> {
-    // TODO move following numbers to constants
-    const magicNumber = encryptedContainer.subarray(0, 4)
-    const formatVersion = encryptedContainer.subarray(4, 4 + 4)
-    const encryptionNonce = encryptedContainer.subarray(4 + 4, 4 + 4 + 16)
-    const encryptedData = encryptedContainer.subarray(4 + 4 + 16)
+    const magicNumberOffset = 0
+    const magicNumberLength = FILE_MAGIC_NUMBER.length
+    const formatVersionOffset = magicNumberOffset + magicNumberLength
+    const formatVersionLength = BINARY_FORMAT_VERSION.length
+    const encryptionNonceOffset = formatVersionOffset + formatVersionLength
+    const encryptionNonceLength = ENCRYPTION_NONCE_LENGTH_BYTES
+    const encryptedDataOffset = encryptionNonceOffset + encryptionNonceLength
+
+    const magicNumber = encryptedContainer.subarray(magicNumberOffset, magicNumberOffset + magicNumberLength)
+    const formatVersion = encryptedContainer.subarray(formatVersionOffset, formatVersionOffset + formatVersionLength)
+    const encryptionNonce = encryptedContainer.subarray(encryptionNonceOffset, encryptionNonceOffset + encryptionNonceLength)
+    const encryptedData = encryptedContainer.subarray(encryptedDataOffset)
     if (!equalUint8Array(magicNumber, FILE_MAGIC_NUMBER)) {
         throw new AppError('MAGIC_NUMBER_MISMATCH')
     }

@@ -69,7 +69,7 @@ async function deriveKey(binaryPasswordKey) {
         ["encrypt", "decrypt"]);
 }
 
-export async function encryptParametrized(password:string,
+async function encryptParametrized(password:string,
                                           cleartext:Uint8Array,
                                           nonce: Uint8Array): Promise<Uint8Array> {
     if (nonce.length != ENCRYPTION_NONCE_LENGTH_BYTES) {
@@ -82,7 +82,7 @@ export async function encryptParametrized(password:string,
     return new Uint8Array(cryptotext)
 }
 
-export async function decryptParametrized(password: string,
+async function decryptParametrized(password: string,
                                           cryptoText: Uint8Array,
                                           nonce: Uint8Array): Promise<Uint8Array> {
     const binaryPasswordKey = await toCryptoKey(password)
@@ -96,7 +96,7 @@ export async function decryptParametrized(password: string,
     return new Uint8Array(decryptedBuffer)
 }
 
-export function concat(...typedArrays: Array<Uint8Array>): Uint8Array {
+function concat(...typedArrays: Array<Uint8Array>): Uint8Array {
     const resultLength = typedArrays.reduce((sum, current) => sum + current.byteLength, 0)
     const result = new Uint8Array(resultLength)
     let startingOffset = 0

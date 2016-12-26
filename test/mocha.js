@@ -1,13 +1,28 @@
 'use strict';
 
-describe('complete en/decrypt', () => {
-    it('should match', (done) => {
-        const password = 'a'
-        const plaintext = 'hello world'
-        completeEncrypt(password, plaintext)
-            .then(cryptotext => completeDecrypt(password, cryptotext))
+describe('randomize', () => {
+    it('matches', () => {
+        const content = new Uint8Array([0, 1, 2, 3, 4])
+        const deRandomizeContent = forTesting.deRandomize(forTesting.randomize(content))
+        expect(deRandomizeContent).to.eql(content)
+    })
+
+    it('does something', () => {
+        const content = new Uint8Array([0, 1, 2, 3, 4])
+        const randomized = forTesting.randomize(content)
+        expect(randomized).not.to.eql(content)
+        expect(randomized.length).to.be.greaterThan(content.length)
+    })
+})
+
+describe('en/de crypt2', () => {
+    it('matches', (done) => {
+        const plaintext = "hello world"
+        const password = "foo bar"
+        encrypt2(password, plaintext)
+            .then(cryptotext => decrypt2(password, cryptotext))
             .then(decrypted => {
-                expect(decrypted).to.equal(plaintext)
+                expect(decrypted).to.eql(plaintext)
                 done()
             })
             .catch(done)
@@ -15,8 +30,8 @@ describe('complete en/decrypt', () => {
     it('empty string', (done) => {
         const password = 'a'
         const plaintext = ''
-        completeEncrypt(password, plaintext)
-            .then(cryptotext => completeDecrypt(password, cryptotext))
+        encrypt2(password, plaintext)
+            .then(cryptotext => decrypt2(password, cryptotext))
             .then(decrypted => {
                 expect(decrypted).to.equal(plaintext)
                 done()
@@ -45,72 +60,10 @@ describe('complete en/decrypt', () => {
             Duis iaculis iaculis pulvinar. Nulla tincidunt tortor at justo fringilla, non sodales ex hendrerit. Nulla rhoncus feugiat eros, id pellentesque nibh fringilla non. In semper nulla nibh, consequat bibendum lorem tristique quis. Ut eget aliquet urna. Duis venenatis vitae lectus at dictum. Quisque facilisis enim quis dignissim hendrerit. Morbi eros ex, mollis nec sapien vitae, semper varius magna. Integer velit ligula, viverra ac ipsum auctor, ultricies tempus risus.
 
             Proin sapien mauris, vehicula et fermentum vel, semper et eros. Vivamus et nibh sodales, dignissim erat in, mollis tellus. Donec purus magna, iaculis scelerisque hendrerit ac, pellentesque nec nulla. Morbi nunc orci, facilisis non lobortis a, maximus in erat. Vestibulum tortor tellus, placerat non sapien at, gravida facilisis augue. Integer ut metus nec nunc placerat lacinia. Maecenas ex ipsum, bibendum in ligula molestie, dapibus rhoncus quam. `
-        completeEncrypt(password, plaintext)
-            .then(cryptotext => completeDecrypt(password, cryptotext))
-            .then(decrypted => {
-                expect(decrypted).to.equal(plaintext)
-                done()
-            })
-            .catch(done)
-    })
-})
-
-describe('completeEncrypt', () => {
-    it('should finish', (done) => {
-        completeEncrypt('a', 'text')
-            .then(() => done())
-            .catch(done)
-    })
-    it('should return Uint8Array', (done) => {
-        completeEncrypt('a', 'text')
-            .then(cryptotext => {
-                expect(cryptotext).to.be.a(Uint8Array)
-                done()
-            })
-            .catch(done)
-    })
-})
-
-describe('completeDecrypt', () => {
-    const cryptoText = new Uint8Array([1,0,0,0,212,24,86,166,91,151,142,76,238,17,88,101,13,177,168,216,128,87,20,82])
-    it('should finish', (done) => {
-        completeDecrypt('a', cryptoText)
-            .then(() => done())
-            .catch(done)
-    })
-    it('should return string', (done) => {
-        completeDecrypt('a', cryptoText)
-            .then(cryptotext => {
-                expect(cryptotext).to.be.a('string')
-                done()
-            })
-            .catch(done)
-    })
-})
-
-describe('randomize', () => {
-    it('matches', () => {
-        const content = new Uint8Array([0, 1, 2, 3, 4])
-        const deRandomizeContent = forTesting.deRandomize(forTesting.randomize(content))
-        expect(deRandomizeContent).to.eql(content)
-    })
-
-    it('does something', () => {
-        const content = new Uint8Array([0, 1, 2, 3, 4])
-        const randomized = forTesting.randomize(content)
-        expect(randomized).not.to.eql(content)
-        expect(randomized.length).to.be.greaterThan(content.length)
-    })
-})
-
-describe('en/de crypt2', () => {
-    it('matches', (done) => {
-        const plaintext = "hello world"
-        const password = "foo bar"
         encrypt2(password, plaintext)
             .then(cryptotext => decrypt2(password, cryptotext))
             .then(decrypted => {
-                expect(decrypted).to.eql(plaintext)
+                expect(decrypted).to.equal(plaintext)
                 done()
             })
             .catch(done)

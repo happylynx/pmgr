@@ -32,9 +32,6 @@ const BINARY_FORMAT_VERSION = (() => {
 })()
 const FILE_MAGIC_NUMBER = toBinary('pmgr')
 
-// TODO delete
-const UNSUPPORTED_FORMAT_VERSION = 'unsupported format version'
-
 const HASH_LENGTH_BYTES = 64
 const ENCRYPTION_NONCE_LENGTH_BYTES = 16
 
@@ -94,28 +91,6 @@ export async function decrypt(password: string, cryptoText: Uint8Array, nonce: U
         key,
         cryptoText)
     return new Uint8Array(decryptedBuffer)
-}
-
-// TODO delete
-export async function completeDecrypt(password: string, blob: Uint8Array): Promise<string> {
-    const version = new Uint32Array(blob.buffer.slice(0, 4))
-    if (version[0] !== FORMAT_VERSION) {
-        throw UNSUPPORTED_FORMAT_VERSION
-    }
-    const nonce = blob.subarray(4, 4 + 16);
-    const cryptoText = blob.subarray(4 + 16)
-    const plainBytes = await decrypt(password, cryptoText, nonce)
-    return toString(plainBytes)
-}
-
-// TODO remove
-export async function completeEncrypt(password: string, clearText: string): Promise<Uint8Array> {
-    // TODO add identifying word
-    const version = new Uint8Array(Uint32Array.of(FORMAT_VERSION).buffer)
-    const nonce = new Uint8Array(16)
-    crypto.getRandomValues(nonce)
-    const cryptText = await encrypt(password, toBinary(clearText), nonce)
-    return concat(version, nonce, cryptText)
 }
 
 export function concat(...typedArrays: Array<Uint8Array>): Uint8Array {

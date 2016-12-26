@@ -244,16 +244,13 @@ export async function encrypt(password: string, plaintext: string): Promise<Uint
 
 export async function decrypt(password: string, encryptedContainer: Uint8Array): Promise<string> {
     const magicNumberOffset = 0
-    const magicNumberLength = FILE_MAGIC_NUMBER.length
-    const formatVersionOffset = magicNumberOffset + magicNumberLength
-    const formatVersionLength = BINARY_FORMAT_VERSION.length
-    const encryptionNonceOffset = formatVersionOffset + formatVersionLength
-    const encryptionNonceLength = ENCRYPTION_NONCE_LENGTH_BYTES
-    const encryptedDataOffset = encryptionNonceOffset + encryptionNonceLength
+    const formatVersionOffset = magicNumberOffset + FILE_MAGIC_NUMBER.length
+    const encryptionNonceOffset = formatVersionOffset + BINARY_FORMAT_VERSION.length
+    const encryptedDataOffset = encryptionNonceOffset + ENCRYPTION_NONCE_LENGTH_BYTES
 
-    const magicNumber = encryptedContainer.subarray(magicNumberOffset, magicNumberOffset + magicNumberLength)
-    const formatVersion = encryptedContainer.subarray(formatVersionOffset, formatVersionOffset + formatVersionLength)
-    const encryptionNonce = encryptedContainer.subarray(encryptionNonceOffset, encryptionNonceOffset + encryptionNonceLength)
+    const magicNumber = encryptedContainer.subarray(magicNumberOffset, magicNumberOffset + FILE_MAGIC_NUMBER.length)
+    const formatVersion = encryptedContainer.subarray(formatVersionOffset, formatVersionOffset + BINARY_FORMAT_VERSION.length)
+    const encryptionNonce = encryptedContainer.subarray(encryptionNonceOffset, encryptionNonceOffset + ENCRYPTION_NONCE_LENGTH_BYTES)
     const encryptedData = encryptedContainer.subarray(encryptedDataOffset)
     if (!equalUint8Array(magicNumber, FILE_MAGIC_NUMBER)) {
         throw new AppError('MAGIC_NUMBER_MISMATCH')

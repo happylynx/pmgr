@@ -189,7 +189,7 @@ function* createRandomIterator(nonce: Uint8Array) {
     const blockToHashView = new DataView(blockToHash)
     let blockIndex = 0
     while (true) {
-        blockToHashView.setInt32(blockIndex)
+        blockToHashView.setInt32(0, blockIndex)
         const hashArrayBuffer = sha3_512.arrayBuffer(blockToHash)
         const hashArray = new Uint8Array(hashArrayBuffer)
         yield* hashArray
@@ -348,5 +348,6 @@ export const forTesting = {
     deRandomize,
     verifyHashBinary,
     prependHashBinary,
-    verifyHashBinary
+    verifyHashBinary,
+    randomUint8Array
 }

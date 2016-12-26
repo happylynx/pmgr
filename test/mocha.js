@@ -139,3 +139,19 @@ describe('hash binary', () => {
         expect(deHashed).to.eql(content)
     })
 })
+
+describe('randomUint8Array', () => {
+    it('returns proper length', () => {
+        const length = 256
+        const seed = new Uint8Array(64)
+        const array = forTesting.randomUint8Array(seed, length)
+        expect(array.length).to.eql(length)
+    })
+    it('doesn\'t repeat itself', () => {
+        const seed = new Uint8Array(64)
+        const array = forTesting.randomUint8Array(seed, 128)
+        const subArray1 = array.subarray(0, 64)
+        const subArray2 = array.subarray(64)
+        expect(subArray1).not.to.eql(subArray2)
+    })
+})

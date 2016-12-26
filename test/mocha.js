@@ -88,20 +88,6 @@ describe('completeDecrypt', () => {
     })
 })
 
-describe('hashing', () => {
-    it('matches', () => {
-        const content = 'a'
-        const verifiedContent = forTesting.verifyHash(forTesting.prependHash(content))
-        expect(verifiedContent).to.equal(content)
-    })
-
-    describe('verifyHash', () => {
-        it('survives short input', () =>{
-            expect(forTesting.verifyHash('a')).to.be(null)
-        })
-    })
-})
-
 describe('randomize', () => {
     it('matches', () => {
         const content = new Uint8Array([0, 1, 2, 3, 4])

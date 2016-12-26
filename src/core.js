@@ -22,9 +22,6 @@ declare var crypto: {
     getRandomValues:(intArray: Uint8Array) => void
 }
 
-/** in bytes */
-const INIT_VECTOR_LENGTH = 256 / 8
-
 const KEY_DERIVATION_SALT = 'key derivation salt'
 
 const FORMAT_VERSION = 1
@@ -37,7 +34,6 @@ const FILE_MAGIC_NUMBER = toBinary('pmgr')
 
 const UNSUPPORTED_FORMAT_VERSION = 'unsupported format version'
 
-const HASH_LENGTH_CHARS = 128
 const HASH_LENGTH_BYTES = 64
 
 // workaround https://github.com/babel/babel/issues/5032
@@ -131,20 +127,6 @@ export function concat(...typedArrays: Array<Uint8Array>): Uint8Array {
 }
 
 declare interface CryptoKey {}
-
-function prependHash(input: string): string {
-    const hash = sha3_512(input)
-    return hash + input
-}
-
-function verifyHash(hashedMessage: string): ?string {
-    const originalHash = hashedMessage.substr(0, HASH_LENGTH_CHARS)
-    const message = hashedMessage.substr(HASH_LENGTH_CHARS)
-    const newHash = sha3_512(message)
-    return originalHash === newHash
-        ? message
-        : null
-}
 
 function prependHashBinary(input: Uint8Array): Uint8Array {
     const hash = new Uint8Array(sha3_512.arrayBuffer(input))
@@ -340,8 +322,6 @@ function getPropertyIfExists(propertyName: string, object: Object): string {
 }
 
 export const forTesting = {
-    prependHash,
-    verifyHash,
     toBinary,
     randomize,
     deRandomize,

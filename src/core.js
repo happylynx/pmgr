@@ -338,6 +338,5 @@ export const forTesting = {
     deRandomize,
     verifyHashBinary,
     prependHashBinary,
-    verifyHashBinary,
     randomUint8Array
 }

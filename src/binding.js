@@ -219,7 +219,7 @@ function encrypt() {
         console.warn('Some implementations of `crypto.subtle.importKey` (e.g. Firefox) doesn\'t allow empty passwords.')
         return;
     }
-    cryptolib.encrypt2(password, clearText)
+    cryptolib.encrypt(password, clearText)
         .then(cryptoText => console.log(cryptoText))
         .catch(console.log.bind(console))
 }

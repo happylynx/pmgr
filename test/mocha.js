@@ -19,8 +19,8 @@ describe('en/de crypt2', () => {
     it('matches', (done) => {
         const plaintext = "hello world"
         const password = "foo bar"
-        encrypt2(password, plaintext)
-            .then(cryptotext => decrypt2(password, cryptotext))
+        encrypt(password, plaintext)
+            .then(cryptotext => decrypt(password, cryptotext))
             .then(decrypted => {
                 expect(decrypted).to.eql(plaintext)
                 done()
@@ -30,8 +30,8 @@ describe('en/de crypt2', () => {
     it('empty string', (done) => {
         const password = 'a'
         const plaintext = ''
-        encrypt2(password, plaintext)
-            .then(cryptotext => decrypt2(password, cryptotext))
+        encrypt(password, plaintext)
+            .then(cryptotext => decrypt(password, cryptotext))
             .then(decrypted => {
                 expect(decrypted).to.equal(plaintext)
                 done()
@@ -60,8 +60,8 @@ describe('en/de crypt2', () => {
             Duis iaculis iaculis pulvinar. Nulla tincidunt tortor at justo fringilla, non sodales ex hendrerit. Nulla rhoncus feugiat eros, id pellentesque nibh fringilla non. In semper nulla nibh, consequat bibendum lorem tristique quis. Ut eget aliquet urna. Duis venenatis vitae lectus at dictum. Quisque facilisis enim quis dignissim hendrerit. Morbi eros ex, mollis nec sapien vitae, semper varius magna. Integer velit ligula, viverra ac ipsum auctor, ultricies tempus risus.
 
             Proin sapien mauris, vehicula et fermentum vel, semper et eros. Vivamus et nibh sodales, dignissim erat in, mollis tellus. Donec purus magna, iaculis scelerisque hendrerit ac, pellentesque nec nulla. Morbi nunc orci, facilisis non lobortis a, maximus in erat. Vestibulum tortor tellus, placerat non sapien at, gravida facilisis augue. Integer ut metus nec nunc placerat lacinia. Maecenas ex ipsum, bibendum in ligula molestie, dapibus rhoncus quam. `
-        encrypt2(password, plaintext)
-            .then(cryptotext => decrypt2(password, cryptotext))
+        encrypt(password, plaintext)
+            .then(cryptotext => decrypt(password, cryptotext))
             .then(decrypted => {
                 expect(decrypted).to.equal(plaintext)
                 done()

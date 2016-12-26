@@ -69,8 +69,9 @@ async function deriveKey(binaryPasswordKey) {
         ["encrypt", "decrypt"]);
 }
 
-// TODO rename to encryptParametrized
-export async function encrypt(password:string, cleartext:Uint8Array, nonce: Uint8Array): Promise<Uint8Array> {
+export async function encryptParametrized(password:string,
+                                          cleartext:Uint8Array,
+                                          nonce: Uint8Array): Promise<Uint8Array> {
     if (nonce.length != ENCRYPTION_NONCE_LENGTH_BYTES) {
         throw new Error()
     }
@@ -81,7 +82,9 @@ export async function encrypt(password:string, cleartext:Uint8Array, nonce: Uint
     return new Uint8Array(cryptotext)
 }
 
-export async function decrypt(password: string, cryptoText: Uint8Array, nonce: Uint8Array): Promise<Uint8Array> {
+export async function decryptParametrized(password: string,
+                                          cryptoText: Uint8Array,
+                                          nonce: Uint8Array): Promise<Uint8Array> {
     const binaryPasswordKey = await toCryptoKey(password)
     const key = await deriveKey(binaryPasswordKey);
     const counter = new Uint8Array(ENCRYPTION_NONCE_LENGTH_BYTES); // AES-CTR requires 16B
@@ -228,19 +231,18 @@ function xorToFirstParam(a: Uint8Array, b: Uint8Array): void {
  * @param password
  * @param plaintext
  */
-// rename to just 'encrypt'
-export async function encrypt2(password: string, plaintext: string): Promise<Uint8Array> {
+export async function encrypt(password: string, plaintext: string): Promise<Uint8Array> {
     const binaryPlaintext = toBinary(plaintext)
     const hashAndPlaintext = prependHashBinary(binaryPlaintext)
     const randomizedPlaintext = randomize(hashAndPlaintext)
     const encryptionNonce = new Uint8Array(ENCRYPTION_NONCE_LENGTH_BYTES)
     window.crypto.getRandomValues(encryptionNonce)
-    const encrypted = await encrypt(password, randomizedPlaintext, encryptionNonce)
+    const encrypted = await encryptParametrized(password, randomizedPlaintext, encryptionNonce)
     const result = concat(FILE_MAGIC_NUMBER, BINARY_FORMAT_VERSION, encryptionNonce, encrypted)
     return result
 }
 
-export async function decrypt2(password: string, encryptedContainer: Uint8Array): Promise<string> {
+export async function decrypt(password: string, encryptedContainer: Uint8Array): Promise<string> {
     const magicNumberOffset = 0
     const magicNumberLength = FILE_MAGIC_NUMBER.length
     const formatVersionOffset = magicNumberOffset + magicNumberLength
@@ -259,7 +261,7 @@ export async function decrypt2(password: string, encryptedContainer: Uint8Array)
     if (!equalUint8Array(formatVersion, BINARY_FORMAT_VERSION)) {
         throw new AppError('CONTAINER_FORMAT_NUMBER_MISMATCH')
     }
-    const plaintext = await decrypt(password, encryptedData, encryptionNonce)
+    const plaintext = await decryptParametrized(password, encryptedData, encryptionNonce)
     const deRandomized = deRandomize(plaintext)
     const binaryData = verifyHashBinary(deRandomized)
     if (binaryData == null) {

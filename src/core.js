@@ -39,13 +39,11 @@ const ENCRYPTION_NONCE_LENGTH_BYTES = 16
 function* _dummy() {}
 
 function toBinary(text:string): Uint8Array {
-    return new TextEncoder('utf-8') // TODO remove constructor param
-        .encode(text)
+    return new TextEncoder().encode(text)
 }
 
 function toString(byteArray: Uint8Array): string {
-    return new TextDecoder('utf-8')
-        .decode(byteArray);
+    return new TextDecoder().decode(byteArray);
 }
 
 async function toCryptoKey(password:string): Promise<CryptoKey> {

@@ -150,9 +150,11 @@ function* createRandomIterator(nonce: Uint8Array): Iterator<number> {
     let blockIndex = 0
     while (true) {
         blockToHashView.setInt32(0, blockIndex)
-        const hashArrayBuffer = sha3_512.arrayBuffer(blockToHash)
+        // wrapping of `blockToHash` to Uint8Array is workaround of https://github.com/emn178/js-sha3/pull/10
+        const hashArrayBuffer = sha3_512.arrayBuffer(new Uint8Array(blockToHash))
         const hashArray = new Uint8Array(hashArrayBuffer)
         yield* hashArray
+        blockIndex++
     }
 }
 

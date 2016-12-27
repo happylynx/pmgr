@@ -170,6 +170,9 @@ function takeUint8(iterator: Iterator<number>, count: number): Uint8Array {
     })
 }
 
+/**
+ * @param seed of length {@link HASH_LENGTH_BYTES}
+ */
 function randomUint8Array(seed: Uint8Array, length: number): Uint8Array {
     const iterator = createRandomIterator(seed)
     const result = takeUint8(iterator, length)

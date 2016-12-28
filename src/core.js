@@ -158,14 +158,10 @@ function* createRandomIterator(nonce: Uint8Array): Iterator<number> {
     }
 }
 
-function takeUint8(iterator: Iterator<number>, count: number): Uint8Array {
+function takeUint8(generator: Iterator<number>, count: number): Uint8Array {
     const result = new Uint8Array(count)
-    return result.map((_, index) => {
-        const iteratorResult: IteratorResult<number, void> = iterator.next()
-        // this `if` branch is there just to satisfy flow type checker
-        if (iteratorResult.done) {
-            throw new Error()
-        }
+    return result.map(_ => {
+        const iteratorResult: {done: false, value: number} = (generator.next(): any)
         return iteratorResult.value
     })
 }

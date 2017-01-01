@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {},
+  "private": true,
   "devDependencies": {
     "babel-cli": "^6.18.0",
     "babel-core": "^6.18.0",

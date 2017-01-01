@@ -1,5 +1,5 @@
 const CopyWebpackPlugin = require('copy-webpack-plugin')
-const FlowStatusWebpackPlugin = require('flow-status-webpack-plugin')
+const FlowWebpackPlugin = require('flow-webpack-plugin')
 
 module.exports = {
     entry: {
@@ -23,12 +23,7 @@ module.exports = {
         ],
     },
     plugins: [
-        // TODO fix error printing when flow is not found, fix searching for flow, add logging - "running flow"
-        // TODO check multiple compilations
-        // TODO webpack fail on error - return code
-        new FlowStatusWebpackPlugin({
-            failOnError: true
-        }),
+        new FlowWebpackPlugin(),
         new CopyWebpackPlugin([{
             from: 'page.html',
             force: true

@@ -189,8 +189,10 @@ async function c() {
     return 'c result'
 }
 
-async function createCreateNewFileContent(password: string): Promise<Uint8Array> {
-    return await cryptolib.encrypt(password, '')
+async function createCreateNewFileContent(password: string): () => Promise<Uint8Array> {
+    return async function () {
+        return await cryptolib.encrypt(password, '')
+    }
 }
 
 function validateFileId(fileId: string): boolean {

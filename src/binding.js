@@ -11,6 +11,7 @@ declare var gapi: Object
 declare var window
 
 import * as cryptolib from './core'
+import * as storage from './storage-google-drive'
 
 // workaround https://github.com/babel/babel/issues/5032
 function* _dummy() {}

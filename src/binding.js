@@ -141,6 +141,25 @@ function addOtherButtons() {
                 alt: 'media'
             }).then(result => console.log(`revision id=${revisionId} of file id=${fileId}`, result),
                 error => console.warn(`error getting revision id=${revisionId} of file id=${fileId}`, error))
+        },
+        '* save': function () {
+            const plainText = $('#plaintext').val()
+            const password = $('#password').val()
+            cryptolib.encrypt(password, plainText)
+                .then(cryptoText => storage.saveFile(cryptoText))
+                .then(() => console.log('* saved'))
+                .catch(error => console.log('* saving failed', error))
+        },
+        '* load': function () {
+            const password = $('#password').val()
+            storage.loadFile(createCreateNewFileContent(password))
+                .then(cryptoText => cryptolib.decrypt(password, cryptoText))
+                .then(plainText => {
+                    $('#plaintext').val(plainText)
+                    console.log('* loaded')
+                })
+                .catch(error => console.log('* loading failed', error))
+        },
         'async error test': function () {
             c()
                 .then(result => {console.log('first then', result); return result})

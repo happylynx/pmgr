@@ -141,6 +141,11 @@ function addOtherButtons() {
                 alt: 'media'
             }).then(result => console.log(`revision id=${revisionId} of file id=${fileId}`, result),
                 error => console.warn(`error getting revision id=${revisionId} of file id=${fileId}`, error))
+        'async error test': function () {
+            c()
+                .then(result => {console.log('first then', result); return result})
+                .then(_ => console.log('second then'))
+                .catch(err => console.error('catch method:', err))
         }
     }
     const parent = $('#other-actions')
@@ -149,6 +154,24 @@ function addOtherButtons() {
         button.click(actions[key])
         parent.append(button)
     })
+}
+
+async function a() {
+    throw '<error in async function>'
+}
+
+async function b() {
+    await a()
+    return 'b result'
+}
+
+async function c() {
+    await b()
+    return 'c result'
+}
+
+async function createCreateNewFileContent(password: string): Promise<Uint8Array> {
+    return await cryptolib.encrypt(password, '')
 }
 
 function validateFileId(fileId: string): boolean {

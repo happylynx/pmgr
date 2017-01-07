@@ -12,6 +12,9 @@ declare var window
 
 import * as cryptolib from './core'
 
+// workaround https://github.com/babel/babel/issues/5032
+function* _dummy() {}
+
 const CLIENT_ID = '58468353349-3kmjikbb3p50dcq0uondosut4aau97sj.apps.googleusercontent.com'
 const SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly',
     'https://www.googleapis.com/auth/drive.file',

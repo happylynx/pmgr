@@ -68,6 +68,15 @@ describe('en/de crypt2', () => {
             })
             .catch(done)
     })
+    describe('encrypt', () => {
+        it('shoult throw on empty password', done => {
+            encrypt('', '')
+                .then(encrypted => done('it should fail', encrypted))
+                .catch(error => {
+                    done()
+                })
+        })
+    })
 })
 
 describe('hash binary', () => {

@@ -48,6 +48,9 @@ function toString(byteArray: Uint8Array): string {
 }
 
 async function toCryptoKey(password:string): Promise<CryptoKey> {
+    if (password === '') {
+        throw 'EMPTY_PASSWORD'
+    }
     return crypto.subtle.importKey('raw', toBinary(password), {name: 'PBKDF2'}, false, ['deriveBits', 'deriveKey'])
 }
 

@@ -16,6 +16,7 @@ declare module 'js-sha3' {
 }
 
 import {sha3_512} from 'js-sha3'
+import type {ErrorKey} from './errors'
 
 declare var crypto: {
     subtle:any,
@@ -264,10 +265,6 @@ export async function decrypt(password: string, encryptedContainer: Uint8Array):
     const textData = toString(binaryData)
     return textData
 }
-
-type ErrorKey = 'HASH_VERIFICATION_FAILED'
-    | 'CONTAINER_FORMAT_NUMBER_MISMATCH'
-    | 'MAGIC_NUMBER_MISMATCH'
 
 class AppError {
 

@@ -1,0 +1,6 @@
+// @flow
+
+export type ErrorKey = 'HASH_VERIFICATION_FAILED'
+    | 'CONTAINER_FORMAT_NUMBER_MISMATCH'
+    | 'MAGIC_NUMBER_MISMATCH'
+

@@ -6,7 +6,8 @@
   "scripts": {
     "start": "webpack-dev-server --hot",
     "build": "webpack",
-    "watch": "webpack --watch"
+    "watch": "webpack --watch",
+    "serve": "http-server -a localhost dist"
   },
   "author": "",
   "license": "ISC",
@@ -23,6 +24,7 @@
     "copy-webpack-plugin": "^4.0.0",
     "flow-bin": "^0.36.0",
     "flow-webpack-plugin": "^0.2.0",
+    "http-server": "^0.9.0",
     "js-sha3": "^0.5.5",
     "webpack": "^1.13.2"
   }

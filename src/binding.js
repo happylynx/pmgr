@@ -152,7 +152,8 @@ function addOtherButtons() {
         },
         '* load': function () {
             const password = $('#password').val()
-            storage.loadFile(createCreateNewFileContent(password))
+            const createFileContent = createCreateNewFileContent(password)
+            storage.loadFile(createFileContent)
                 .then(cryptoText => cryptolib.decrypt(password, cryptoText))
                 .then(plainText => {
                     $('#plaintext').val(plainText)
@@ -189,7 +190,7 @@ async function c() {
     return 'c result'
 }
 
-async function createCreateNewFileContent(password: string): () => Promise<Uint8Array> {
+function createCreateNewFileContent(password: string): () => Promise<Uint8Array> {
     return async function () {
         return await cryptolib.encrypt(password, '')
     }

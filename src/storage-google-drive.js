@@ -9,6 +9,7 @@ declare var gapi: Gapi
 function* _dummy() {}
 
 const FILE_NAME = 'pmgr-container.bin'
+const APP_DIRECTORY_NAME = 'appDataFolder'
 const CLIENT_ID = '58468353349-3kmjikbb3p50dcq0uondosut4aau97sj.apps.googleusercontent.com'
 const SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly',
     'https://www.googleapis.com/auth/drive.file',
@@ -30,27 +31,11 @@ function l(...messages) {
  *   2. otherwise content of the file is returned
  */
 async function loadFile(createNewFileContent: () => Promise<Uint8Array>): Promise<Uint8Array> {
-    l('loadFile', 1)
     await getApiReady()
-    l('loadFile', 2)
     if (fileIdCache == null) {
-        l('loadFile', 3.1)
         fileIdCache = await findFile(createNewFileContent)
-        l('loadFile', 3.2)
     }
-    l('loadFile', 4)
-    // TODO delete this branch probably
-    if (fileIdCache == null) {
-        l('loadFile', 5.1)
-        const fileContent = await createNewFileContent()
-        l('loadFile', 5.2)
-        fileIdCache = await saveNewFile(fileContent)
-        l('loadFile', 5.3)
-        return fileContent
-    }
-    l('loadFile', 6)
     const content = getFileById(fileIdCache)
-    l('loadFile', 7)
     return content
 }
 
@@ -68,32 +53,21 @@ async function saveFile(content: Uint8Array): Promise<void> {
  * @param fileId
  * @return {Promise.<Uint8Array>} file content
  */
-async function getFileById(fileId: string): Uint8Array {
-    gapi.client.drive.files.get({
-        fileId: fileId,
-        encoding: null
+function getFileById(fileId: string): Promise<Uint8Array> {
+    return new Promise((resolve, reject) => {
+        gapi.client.drive.files.get({
+            fileId: fileId,
+            alt: 'media'
+        }).then(response => {
+            console.log(`get file id=${fileId}`, response)
+            const binaryHoldingString = response.body
+            const binary = stringToBinary(binaryHoldingString)
+            resolve(binary)
+        }, error => {
+            console.warn(`error getting file id=${fileId}`, error)
+            reject(error)
+        })
     })
-        .then(result => console.log(`get file id=${fileId}`, result),
-            error => console.warn(`error getting file id=${fileId}`, error))
-}
-
-/**
- * Creates new file when it's known there is no file existing
- * @param fileContent content of new file
- * @return {Promise.<string>} id of new file
- */
-// TODO remove
-async function saveNewFile(fileContent: Uint8Array): Promise<string> {
-    await fireCreateFileRequest(fileContent)
-    const files = await getAllFiles()
-    if (files.length === 0) {
-        throw new Error('Creation of new file failed.')
-    }
-    if (files.length > 1) {
-        const oldestFile = await deleteNewerFiles(files)
-        return oldestFile.id // TODO check
-    }
-    return files[0].id // TODO check
 }
 
 interface DriveFile {
@@ -107,7 +81,7 @@ async function getAllFiles(): Promise<Array<DriveFile>> {
         const request = gapi.client.drive.files.list({
             'pageSize': 10,
             'fields': 'nextPageToken, files(id, name, createdTime)',
-            'spaces': 'appDataFolder',
+            'spaces': APP_DIRECTORY_NAME,
             q: `name = '${FILE_NAME}'`
         });
         request.then(
@@ -116,13 +90,10 @@ async function getAllFiles(): Promise<Array<DriveFile>> {
                 resolve(response.result.files)
             },
             error => {
-                console.log('getAllFiles response', error)
+                console.log('getAllFiles error', error)
                 reject(error)
             }
         )
-    }).then(files => {
-        console.log('getAllFiles', files)
-        return files
     })
 }
 
@@ -153,22 +124,20 @@ async function findFile(createNewFileContent: ?(() => Promise<Uint8Array>)): Pro
 }
 
 async function createFile(createNewFileContent: () => Promise<Uint8Array>): Promise<string> {
-    // TODO remove try catch block
-    try {
-        const fileContent = await createNewFileContent()
-        await fireCreateRequest(fileContent)
-        return await findFile(null)
-    } catch (err) {
-        console.error('createFile exception', err)
-        throw err
-    }
+    const fileContent = await createNewFileContent()
+    await fireCreateRequest(fileContent)
+    return await findFile(null)
 }
 
+/**
+ * @param fileContent
+ * @return {Promise<string>} file id
+ */
 async function fireCreateRequest(fileContent: Uint8Array): Promise<string> /*file id*/ {
     return new Promise((resolve, reject) => {
         const {separator, body} = multipart({
-                name: 'uploadedFile',
-                parents: ['appDataFolder']
+                name: FILE_NAME,
+                parents: [APP_DIRECTORY_NAME]
             },
             binaryToString(fileContent),
             'application/octet-stream'
@@ -187,7 +156,7 @@ async function fireCreateRequest(fileContent: Uint8Array): Promise<string> /*fil
         request.then(
             response => {
                 console.log('response of fileCreateRequest', response)
-                resolve('') // TODO
+                resolve(response.result.id)
             }, error => {
                 console.log('error of fileCreateRequest', error)
                 reject(error)
@@ -200,39 +169,31 @@ function binaryToString(binary: Uint8Array): string {
     return String.fromCharCode.apply(null, binary)
 }
 
+function stringToBinary(str: string): Uint8Array {
+    return new Uint8Array(Array.from(str).map(char => char.charCodeAt(0)))
+}
+
 /**
  * It makes sure that user is logged in (optionally it pops up login dialog) and that
  * the drive api is loaded
  */
 function getApiReady(): Promise<void> {
-    l('getApiReady', 1)
     return new Promise((resolve, reject) => {
-        l('getApiReady', 2)
-        try {
-            gapi.auth.authorize({
-                    client_id: CLIENT_ID,
-                    scope: SCOPES,
-                    immediate: false
-                },
-                authResult => {
-                    l('getApiReady', 3)
-                    if (authResult.error) {
-                        l('getApiReady', 4)
-                        reject(authResult.error)
-                        l('getApiReady', 5)
-                        return;
-                    }
-                    l('getApiReady', 6)
-                    gapi.client.load('drive', 'v3', () => {
-                        l('getApiReady', 7)
-                        resolve()
-                    });
-                    l('getApiReady', 8)
+        gapi.auth.authorize({
+                client_id: CLIENT_ID,
+                scope: SCOPES,
+                immediate: false
+            },
+            authResult => {
+                if (authResult.error) {
+                    reject(authResult.error)
+                    return;
+                }
+                gapi.client.load('drive', 'v3', () => {
+                    l('getApiReady', 'drive lib loaded')
+                    resolve()
                 });
-        } catch (err) {
-            console.error('error in getApiReady', err)
-            l('getApiReady', 9)
-        }
+            });
     })
 }
 

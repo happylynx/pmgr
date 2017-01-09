@@ -5,8 +5,8 @@
  *
  * |string content|
  * |binary content|
- * |hash||binary content|
- * |randomization nonce||bytes from above|
+ * |hash (64B)||bytes from above|
+ * |randomization nonce (64B)||randomized bytes from above|
  * |encrypted bytes from above|
  * |file format identifier (4B)||container format identifier (4B)||encryption nonce(16 B)||bytes from above|
  */
@@ -110,6 +110,11 @@ function concat(...typedArrays: Array<Uint8Array>): Uint8Array {
 // TODO externalize type definitions
 declare interface CryptoKey {}
 
+/**
+ * It prepends hash (sha3 512b) of length {@link HASH_LENGTH_BYTES}
+ * @param input
+ * @return {Uint8Array}
+ */
 function prependHashBinary(input: Uint8Array): Uint8Array {
     const hash = new Uint8Array(sha3_512.arrayBuffer(input))
     const result = new Uint8Array(hash.length + input.length)
@@ -179,6 +184,12 @@ function randomUint8Array(seed: Uint8Array, length: number): Uint8Array {
     return result
 }
 
+/**
+ * It prepends randomization seed of length {@link HASH_LENGTH_BYTES} and xor the input
+ * with random stream base on the seed.
+ * @param input
+ * @return {Uint8Array}
+ */
 function randomize(input: Uint8Array): Uint8Array {
     const nonce = new Uint8Array(HASH_LENGTH_BYTES);
     crypto.getRandomValues(nonce)

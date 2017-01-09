@@ -83,8 +83,8 @@ async function encryptParametrized(password:string,
 }
 
 async function decryptParametrized(password: string,
-                                          cryptoText: Uint8Array,
-                                          nonce: Uint8Array): Promise<Uint8Array> {
+                                   cryptoText: Uint8Array,
+                                   nonce: Uint8Array): Promise<Uint8Array> {
     const binaryPasswordKey = await toCryptoKey(password)
     const key = await deriveKey(binaryPasswordKey);
     const counter = new Uint8Array(ENCRYPTION_NONCE_LENGTH_BYTES); // AES-CTR requires 16B

@@ -12,6 +12,7 @@ declare var window
 
 import * as cryptolib from './core'
 import * as storage from './storage-google-drive'
+import * as utils from './utils'
 
 // workaround https://github.com/babel/babel/issues/5032
 function* _dummy() {}
@@ -73,7 +74,8 @@ function addOtherButtons() {
                 return;
             }
             gapi.client.drive.files.get({
-                fileId: fileId
+                fileId: fileId,
+                fields: 'name, size, id'
             })
                 .then(result => console.log(`get file id=${fileId}`, result),
                     error => console.warn(`error getting file id=${fileId}`, error))
@@ -100,6 +102,10 @@ function addOtherButtons() {
                 return;
             }
             const content = window.prompt('Enter file content')
+            if (content === null) {
+                console.log('file content update cancelled')
+                return
+            }
             const request = gapi.client.request({
                 path: 'https://www.googleapis.com/upload/drive/v3/files/' + fileId,
                 method: 'PATCH',
@@ -166,6 +172,35 @@ function addOtherButtons() {
                 .then(result => {console.log('first then', result); return result})
                 .then(_ => console.log('second then'))
                 .catch(err => console.error('catch method:', err))
+        },
+        'delete file': function() {
+            const fileId = window.prompt('Enter file id')
+            const valid = validateFileId(fileId)
+            if (!valid) {
+                console.warn(`File id ${fileId} is not valid.`)
+                return;
+            }
+            storage.removeFile(fileId)
+        },
+        'delete all pmgr files': async function () {
+            const pmgrFiles = await storage.getAllFiles()
+            console.log('files to delete:', pmgrFiles)
+            pmgrFiles.forEach(file => storage.removeFile(file.id))
+        },
+        'raw load': async function () {
+            const binaryContent = await storage.loadFile(() => Promise.resolve(new Uint8Array([])))
+            const stringContent = utils.binaryToString(binaryContent)
+            $('#plaintext').val(stringContent)
+            console.log('raw load', binaryContent, stringContent)
+        },
+        'raw save': async function () {
+            const stringContent = $('#plaintext').val()
+            const binaryContent = utils.stringToBinary(stringContent)
+
+            const alternativeBinary = new Uint8Array([254, 255])
+            console.log(utils.binaryToString(alternativeBinary))
+            await storage.saveFile(alternativeBinary)
+            console.log('raw save done', binaryContent, stringContent)
         }
     }
     const parent = $('#other-actions')

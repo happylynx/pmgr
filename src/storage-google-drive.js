@@ -1,7 +1,7 @@
 // @flow
 
 import type {Gapi} from './external'
-import multipart from './multipart'
+import * as utils from './utils'
 
 declare var gapi: Gapi
 
@@ -30,7 +30,7 @@ function l(...messages) {
  *   1. if it doesn't exist, it stores an empty one an return empty array
  *   2. otherwise content of the file is returned
  */
-async function loadFile(createNewFileContent: () => Promise<Uint8Array>): Promise<Uint8Array> {
+export async function loadFile(createNewFileContent: () => Promise<Uint8Array>): Promise<Uint8Array> {
     await getApiReady()
     if (fileIdCache == null) {
         fileIdCache = await findFile(createNewFileContent)
@@ -45,8 +45,47 @@ async function loadFile(createNewFileContent: () => Promise<Uint8Array>): Promis
  * 3. if file doesn't exist, it creates new one
  * 4. file content is updated
  */
-async function saveFile(content: Uint8Array): Promise<void> {
+export async function saveFile(content: Uint8Array): Promise<void> {
     await getApiReady()
+    if (fileIdCache == null) {
+        fileIdCache = await findFile(() => Promise.resolve(content))
+    }
+    await fireUpdateRequestFetch(fileIdCache, content)
+}
+
+export function removeFile(fileId: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+        gapi.client.drive.files.delete({
+            fileId: fileId
+        }).then(response => {
+            console.log(`file deleted id=${fileId}`, response)
+            resolve()
+        }, error => {
+            console.log(`file deletion failed id=${fileId}`, error)
+            reject(error)
+        })
+    })
+}
+
+function fireUpdateRequestFetch(fileId: string, content: Uint8Array): Promise<void> {
+    const headers = new Headers({
+        'Content-Type': 'application/octet-stream',
+        Authorization: `Bearer ${gapi.auth.getToken().access_token}`
+    })
+    const options = {
+        method: 'PATCH',
+        mode: 'cors',
+        headers,
+        body: content
+    }
+    return fetch(`https://content.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`, options)
+        .then(response => {
+            console.log('file update succeeded', fileId, content, response)
+        })
+        .catch(error => {
+            console.log('file update failed', fileId, content, error)
+            throw error
+        })
 }
 
 /**
@@ -57,11 +96,13 @@ function getFileById(fileId: string): Promise<Uint8Array> {
     return new Promise((resolve, reject) => {
         gapi.client.drive.files.get({
             fileId: fileId,
+            encoding: null,
             alt: 'media'
         }).then(response => {
-            console.log(`get file id=${fileId}`, response)
             const binaryHoldingString = response.body
-            const binary = stringToBinary(binaryHoldingString)
+            const binary = utils.stringToBinary(binaryHoldingString)
+            console.log(`get file id=${fileId}`, response, 'file content', binary,
+                'content length', binaryHoldingString.length, binary.length)
             resolve(binary)
         }, error => {
             console.warn(`error getting file id=${fileId}`, error)
@@ -76,7 +117,7 @@ interface DriveFile {
     createdTime: mixed
 }
 
-async function getAllFiles(): Promise<Array<DriveFile>> {
+export async function getAllFiles(): Promise<Array<DriveFile>> {
     return new Promise((resolve, reject) => {
         const request = gapi.client.drive.files.list({
             'pageSize': 10,
@@ -135,12 +176,14 @@ async function createFile(createNewFileContent: () => Promise<Uint8Array>): Prom
  */
 async function fireCreateRequest(fileContent: Uint8Array): Promise<string> /*file id*/ {
     return new Promise((resolve, reject) => {
-        const {separator, body} = multipart({
+        const {separator, body} = utils.multipart({
                 name: FILE_NAME,
-                parents: [APP_DIRECTORY_NAME]
+                parents: [APP_DIRECTORY_NAME],
+                encoding: null
             },
-            binaryToString(fileContent),
-            'application/octet-stream'
+            utils.binaryToString(fileContent),
+            'application/octet-stream',
+            'binary'
         )
         const request = gapi.client.request({
             path: 'https://www.googleapis.com/upload/drive/v3/files',
@@ -155,7 +198,7 @@ async function fireCreateRequest(fileContent: Uint8Array): Promise<string> /*fil
         });
         request.then(
             response => {
-                console.log('response of fileCreateRequest', response)
+                console.log('response of fileCreateRequest', response, 'file content', fileContent)
                 resolve(response.result.id)
             }, error => {
                 console.log('error of fileCreateRequest', error)
@@ -163,14 +206,6 @@ async function fireCreateRequest(fileContent: Uint8Array): Promise<string> /*fil
             }
         )
     })
-}
-
-function binaryToString(binary: Uint8Array): string {
-    return String.fromCharCode.apply(null, binary)
-}
-
-function stringToBinary(str: string): Uint8Array {
-    return new Uint8Array(Array.from(str).map(char => char.charCodeAt(0)))
 }
 
 /**
@@ -195,9 +230,4 @@ function getApiReady(): Promise<void> {
                 });
             });
     })
-}
-
-module.exports = {
-    loadFile,
-    saveFile
 }
